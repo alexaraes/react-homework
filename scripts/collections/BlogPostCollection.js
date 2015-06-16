@@ -2,7 +2,7 @@ var $ = require('jquery');
 var Backbone = require('backbone');
 Backbone.$ = $;
 
-var CommentModel = require('../models/PostModel.js');
+var PostModel = require('../models/BlogPostModel.js');
 
 module.exports = Backbone.Collection.extend({
 	model: PostModel

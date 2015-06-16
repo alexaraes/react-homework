@@ -8,6 +8,6 @@ module.exports = Backbone.Model.extend({
 		username: null,
 		password: null,
 		email: null,
-		creationDate: new Date()
+		createdAt: null
 	}
 });
