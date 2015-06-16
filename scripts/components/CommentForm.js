@@ -11,6 +11,6 @@ module.exports = React.createClass({
 	},
 	commentSubmitted: function(e) {
 		e.preventDefault();
-		console.log(this.refs.commentText);
+		var comment = this.refs.commentText.getDOMNode().value;
 	}
 });

@@ -1,0 +1,11 @@
+var $ = require('jquery');
+var Backbone = require('backbone');
+Backbone.$ = require('jquery');
+
+module.exports = Backbone.Model.extend({
+	defaults: {
+		text: '',
+		postId: null,
+		_id: null
+	}
+});
