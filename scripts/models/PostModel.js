@@ -7,7 +7,7 @@ module.exports = Backbone.Model.extend({
 		title: '',
 		text: '',
 		userId: null,
-		createdAt: null,
+		creationDate: new Date(),
 		_id: null
 	}
 });

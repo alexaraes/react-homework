@@ -6,6 +6,6 @@ module.exports = Backbone.Model.extend({
 	defaults: {
 		text: '',
 		userId: null,
-		createdAt: null
+		creationDate: new Date()
 	}
 });
