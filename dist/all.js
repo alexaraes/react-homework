@@ -35632,7 +35632,33 @@ module.exports = Backbone.Collection.extend({
 	model: PostModel
 });
 
-},{"../models/BlogPostModel.js":166,"backbone":1,"jquery":4}],162:[function(require,module,exports){
+},{"../models/BlogPostModel.js":170,"backbone":1,"jquery":4}],162:[function(require,module,exports){
+'use strict';
+
+var $ = require('jquery');
+var Backbone = require('backbone');
+Backbone.$ = $;
+
+var CommentModel = require('../models/CommentModel.js');
+
+module.exports = Backbone.Collection.extend({
+	model: CommentModel
+});
+
+},{"../models/CommentModel.js":171,"backbone":1,"jquery":4}],163:[function(require,module,exports){
+'use strict';
+
+var $ = require('jquery');
+var Backbone = require('backbone');
+Backbone.$ = $;
+
+var UserModel = require('../models/UserModel.js');
+
+module.exports = Backbone.Collection.extend({
+	model: UserModel
+});
+
+},{"../models/UserModel.js":172,"backbone":1,"jquery":4}],164:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -35642,13 +35668,6 @@ module.exports = React.createClass({
 	displayName: 'exports',
 
 	render: function render() {
-		var chooseCategory = this.props.allCategories.map(function (category) {
-			return React.createElement(
-				'option',
-				{ key: category },
-				category
-			);
-		});
 		return React.createElement(
 			'div',
 			null,
@@ -35657,20 +35676,12 @@ module.exports = React.createClass({
 				{ onSubmit: this.submitBlog },
 				React.createElement('input', { type: 'text', ref: 'blogTitle', placeholder: 'Title goes here' }),
 				React.createElement('br', null),
-				React.createElement(
-					'select',
-					{ ref: 'blogCategory' },
-					' ',
-					chooseCategory,
-					' '
-				),
-				React.createElement('br', null),
 				React.createElement('textarea', { ref: 'blogText' }),
 				React.createElement('br', null),
 				React.createElement(
 					'button',
 					{ type: 'submit' },
-					'Post you blog'
+					'Post'
 				)
 			),
 			React.createElement('div', { ref: 'errors' })
@@ -35681,7 +35692,6 @@ module.exports = React.createClass({
 		var blogPost = new BlogModel({
 			title: this.refs.blogTitle.getDOMNode().value,
 			body: this.refs.blogText.getDOMNode().value,
-			category: this.refs.blogCategory.getDOMNode().value,
 			createdAt: new Date()
 		});
 		if (!blogPost.isValid()) {
@@ -35692,12 +35702,17 @@ module.exports = React.createClass({
 	}
 });
 
-},{"../models/BlogPostModel":166,"react":160}],163:[function(require,module,exports){
+},{"../models/BlogPostModel":170,"react":160}],165:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
 var _ = require('backbone/node_modules/underscore');
 var moment = require('moment');
+
+var CommentCollection = require('../collections/CommentCollection');
+var CommentFormComponent = require('./CommentFormComponent');
+
+var commentPosts = new CommentCollection([]);
 
 module.exports = React.createClass({
 	displayName: 'exports',
@@ -35730,21 +35745,29 @@ module.exports = React.createClass({
 				'div',
 				{ key: postModel.cid },
 				React.createElement(
-					'h3',
+					'div',
 					null,
-					postModel.get('title')
-				),
-				React.createElement(
-					'p',
-					null,
-					postModel.get('body')
+					React.createElement(
+						'h3',
+						null,
+						postModel.get('title')
+					),
+					React.createElement(
+						'p',
+						null,
+						postModel.get('body')
+					),
+					React.createElement(
+						'div',
+						null,
+						moment(postModel.get('createdAt')).calendar().toString()
+					),
+					React.createElement('br', null)
 				),
 				React.createElement(
 					'div',
 					null,
-					moment(postModel.get('createdAt')).calendar().toString(),
-					' | ',
-					postModel.get('category')
+					React.createElement(CommentFormComponent, { posts: commentPosts })
 				)
 			);
 		});
@@ -35753,7 +35776,6 @@ module.exports = React.createClass({
 		return React.createElement(
 			'div',
 			null,
-			React.createElement('input', { type: 'text', ref: 'number', onChange: this.numberChanged }),
 			topNElements
 		);
 	},
@@ -35775,7 +35797,44 @@ module.exports = React.createClass({
 	}
 });
 
-},{"backbone/node_modules/underscore":2,"moment":5,"react":160}],164:[function(require,module,exports){
+},{"../collections/CommentCollection":162,"./CommentFormComponent":166,"backbone/node_modules/underscore":2,"moment":5,"react":160}],166:[function(require,module,exports){
+'use strict';
+
+var React = require('react');
+var BlogModel = require('../models/BlogPostModel');
+var CommentModel = require('../models/CommentModel');
+
+module.exports = React.createClass({
+	displayName: 'exports',
+
+	render: function render() {
+		return React.createElement(
+			'div',
+			null,
+			React.createElement(
+				'form',
+				{ onSubmit: this.submitComment },
+				React.createElement('textarea', { ref: 'commentText' }),
+				React.createElement('br', null),
+				React.createElement(
+					'button',
+					{ type: 'submit' },
+					'Leave a comment'
+				)
+			),
+			React.createElement('div', { ref: 'errors' })
+		);
+	},
+	submitComment: function submitComment(e) {
+		e.preventDefault();
+		var commentPost = new CommentModel({
+			text: this.refs.commentText.getDOMNode().value,
+			createdAt: new Date()
+		});
+	}
+});
+
+},{"../models/BlogPostModel":170,"../models/CommentModel":171,"react":160}],167:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -35783,59 +35842,75 @@ var React = require('react');
 module.exports = React.createClass({
 	displayName: 'exports',
 
-	getInitialState: function getInitialState() {
-		return {
-			numLikes: 0
-		};
-	},
 	render: function render() {
 		return React.createElement(
-			'button',
-			{ onClick: this.incrementCounter },
-			this.state.numLikes,
-			' Likes'
+			'div',
+			null,
+			React.createElement(
+				'div',
+				null,
+				React.createElement(
+					'p',
+					null,
+					CommentModel.get('text')
+				),
+				React.createElement(
+					'div',
+					null,
+					moment(CommentModel.get('createdAt')).calendar().toString()
+				),
+				React.createElement('br', null)
+			)
 		);
 	},
-
-	incrementCounter: function incrementCounter(e) {
-		this.setState({
-			numLikes: this.state.numLikes + 1
-		});
+	commentSubmitted: function commentSubmitted(e) {
+		e.preventDefault();
+		console.log(this.refs.commentText);
 	}
 });
 
-},{"react":160}],165:[function(require,module,exports){
+},{"react":160}],168:[function(require,module,exports){
+
+},{}],169:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
 var BlogListComponent = require('./components/BlogListComponent');
-var BlogPostCollection = require('./collections/BlogPostCollection');
 var BlogFormComponent = require('./components/BlogFormComponent');
-var CounterComponent = require('./components/CounterComponent');
+var CommentListComponent = require('./components/CommentListComponent');
+var CommentFormComponent = require('./components/CommentFormComponent');
+var LoginComponent = require('./components/LoginComponent');
 
-var blogPosts = new BlogPostCollection([{
-	title: 'Breaking news! React is awesome :)',
-	body: 'Lorem ipsum Id exercitation voluptate sunt officia aliquip labore sed ullamco in id culpa sit non aute deserunt velit laborum minim nulla dolore voluptate consectetur non proident sint sunt magna commodo occaecat anim eiusmod adipisicing incididunt velit aliqua dolore consequat.',
-	userId: 1,
-	category: 'react',
-	createdAt: new Date()
-}]);
+var BlogPostCollection = require('./collections/BlogPostCollection');
+var UserCollection = require('./collections/UserCollection');
+var CommentCollection = require('./collections/CommentCollection');
 
-var allCategories = ['react', 'javascript', 'html', 'css'];
+var blogPosts = new BlogPostCollection([]);
+
 function newPost(postModel) {
 	console.log('newPost was run');
 	blogPosts.add(postModel);
 }
 
+var commentPost = new CommentCollection([]);
+
+function newComment(commentModel) {
+	console.log('newComment was run');
+	commentPost.add(CommentModel);
+}
+
 React.render(React.createElement(
 	'div',
 	null,
-	React.createElement(BlogFormComponent, { allCategories: allCategories, newPost: newPost }),
-	React.createElement(BlogListComponent, { posts: blogPosts, number: 5 }),
-	React.createElement(CounterComponent, null)
+	React.createElement(
+		'div',
+		null,
+		React.createElement(BlogFormComponent, { newPost: newPost }),
+		React.createElement(BlogListComponent, { posts: blogPosts, number: 5 })
+	)
 ), document.getElementById('container'));
 
-},{"./collections/BlogPostCollection":161,"./components/BlogFormComponent":162,"./components/BlogListComponent":163,"./components/CounterComponent":164,"react":160}],166:[function(require,module,exports){
+},{"./collections/BlogPostCollection":161,"./collections/CommentCollection":162,"./collections/UserCollection":163,"./components/BlogFormComponent":164,"./components/BlogListComponent":165,"./components/CommentFormComponent":166,"./components/CommentListComponent":167,"./components/LoginComponent":168,"react":160}],170:[function(require,module,exports){
 'use strict';
 
 var Backbone = require('backbone');
@@ -35852,8 +35927,6 @@ module.exports = Backbone.Model.extend({
 	validate: function validate(attr) {
 		if (!attr.title) {
 			return 'Enter a post title.';
-		} else if (attr.category == '') {
-			return 'Enter a post category';
 		} else if (!attr.body) {
 			return 'Enter a post body.';
 		}
@@ -35861,7 +35934,24 @@ module.exports = Backbone.Model.extend({
 	}
 });
 
-},{"backbone":1,"jquery":4}]},{},[165])
+},{"backbone":1,"jquery":4}],171:[function(require,module,exports){
+'use strict';
+
+var $ = require('jquery');
+var Backbone = require('backbone');
+Backbone.$ = require('jquery');
+
+module.exports = Backbone.Model.extend({
+	defaults: {
+		text: '',
+		userId: null,
+		createdAt: null
+	}
+});
+
+},{"backbone":1,"jquery":4}],172:[function(require,module,exports){
+arguments[4][168][0].apply(exports,arguments)
+},{"dup":168}]},{},[169])
 
 
 //# sourceMappingURL=all.js.map

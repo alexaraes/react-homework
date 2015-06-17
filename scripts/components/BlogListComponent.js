@@ -2,6 +2,11 @@ var React = require('react');
 var _ = require('backbone/node_modules/underscore');
 var moment = require('moment');
 
+var CommentCollection = require('../collections/CommentCollection');
+var CommentFormComponent = require('./CommentFormComponent');
+
+var commentPosts = new CommentCollection([]);
+
 module.exports = React.createClass({
 	componentWillMount: function() {
 		this.props.posts.on('add', this.postAdded);
@@ -29,9 +34,14 @@ module.exports = React.createClass({
 		var topNElements = topNModels.map(function(postModel) {
 			return (
 				<div key={postModel.cid}>
-					<h3>{postModel.get('title')}</h3>
-					<p>{postModel.get('body')}</p>
-					<div>{moment(postModel.get('createdAt')).calendar().toString()} | {postModel.get('category')}</div>
+					<div>
+						<h3>{postModel.get('title')}</h3>
+						<p>{postModel.get('body')}</p>
+						<div>{moment(postModel.get('createdAt')).calendar().toString()}</div><br/>
+					</div>
+					<div>
+						<CommentFormComponent posts={commentPosts} />
+					</div>
 				</div>
 			)
 		});
@@ -39,7 +49,6 @@ module.exports = React.createClass({
 		// Return the array of react elements wrapped in a div
 		return (
 			<div>
-				<input type="text" ref="number" onChange={this.numberChanged} />
 				{topNElements}
 			</div>
 		);

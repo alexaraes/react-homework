@@ -3,18 +3,12 @@ var BlogModel = require('../models/BlogPostModel');
 
 module.exports = React.createClass({
 	render: function() {
-		var chooseCategory = this.props.allCategories.map(function(category) {
-			return ( 
-				<option key={category}>{category}</option>
-			);
-		});
 		return (
 			<div>
 				<form onSubmit={this.submitBlog}>
 					<input type='text' ref='blogTitle' placeholder='Title goes here' /><br/>
-					<select ref='blogCategory'> {chooseCategory} </select><br/>
 					<textarea ref='blogText'></textarea><br/>
-					<button type='submit'>Post you blog</button>
+					<button type='submit'>Post</button>
 				</form>
 				<div ref='errors'></div>
 			</div>        
@@ -25,7 +19,6 @@ module.exports = React.createClass({
 		var blogPost = new BlogModel({
 			title: this.refs.blogTitle.getDOMNode().value,
 			body: this.refs.blogText.getDOMNode().value,
-			category: this.refs.blogCategory.getDOMNode().value,
 			createdAt: new Date()
 		});
 		if(!blogPost.isValid()) {
